@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 def get_events(rowcol_id, is_target):
-     """Args:
+    """Args:
         rowcol_id: 1d array of ints, 0 for no rowcol and 1-12 for rowcols on the P300 matrix 
         is_target: 1d array, boolean, True if rowcol being flashed is target     
        Returns:
@@ -56,10 +56,15 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
 def get_erps (eeg_epochs, is_target_event):
     """
     Args:
-         eeg_epochs: 3d array of size (event_samples.shape[1], samples_per_epoch, eeg_data.shape[0]) that contains 
-          all eeg_epochs (both target and non-target). 
+        eeg_epochs: 3d array of size (event_samples.shape[1], samples_per_epoch, eeg_data.shape[0]) that contains 
+        all eeg_epochs (both target and non-target). 
+        is_target_event: 1d array of size (event_samples.shape[1]), boolean mask for each event in event_sample, True if target event
 
-
+    Returns:
+        target_erp: 2d array of size (samples_per_epoch, eeg_data.shape[0]) where eeg_data.shape[0] refers to number of EEG channels. Mean 
+        ERP of all epochs that are labelled as target epochs 
+        nontarget_erp: 2d array of size (samples_per_epoch, eeg_data.shape[0]). Mean ERP of all epochs that are labelled as non-target epochs. 
+        
     """
     target_erp = np.mean(eeg_epochs[is_target_event], axis = 0)
     nontarget_erp = np.mean(eeg_epochs[~is_target_event], axis = 0)
