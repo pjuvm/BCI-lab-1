@@ -72,6 +72,11 @@ def get_erps (eeg_epochs, is_target_event):
 
 
 def plot_erps(target_erp, nontarget_erp, erp_times):
+    """
+    Args:
+        target_erp: 2d array of size (samples_per_epoch, eeg_data.shape[0]) where eeg_data.shape[0] refers to number of EEG channels. Mean 
+        ERP of all epochs that are labelled as target epochs 
+    """
     # Reshape the data for subplot arrangement
     target_erp = target_erp.T  # Transpose to have shape (8, 150)
     nontarget_erp = nontarget_erp.T  # Transpose to have shape (8, 150)
