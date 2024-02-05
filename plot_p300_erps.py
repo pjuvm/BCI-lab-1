@@ -14,7 +14,22 @@ def get_events(rowcol_id, is_target):
     return event_sample, is_target_event
 
 def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch_end_time=1):
+    """
+     Args: 
+          eeg_time: 1d array (float), time axis in millseconds 
+          eeg_data: 2d array of dimensions channels x samples 
+          event_sample: 1d array (float) of indices where events occurred 
+          epoch_start_time: float, fraction of second before event to start epoch
+          epoch_end_time: float, fraction of second after event to end epoch
+     Returns:
+          eeg_epochs: 3d array of size (event_samples.shape[1], samples_per_epoch, eeg_data.shape[0]) that contains 
+          all eeg_epochs (both target and non-target). 
+          --event_samples.shape[1] is the number of events (both target and non-target). 
+          --eeg_data.shape[0] is number of EEG channels. 
+          --samples_per_epoch is the number of EEG samples (data points) per epoch
+          erp_times: 1d array of size (seconds_per_epoch * samples_per_second), axis of time relative to the event onset 
 
+    """
     samples_per_second = 0
     seconds_per_epoch = epoch_end_time - epoch_start_time
 
@@ -39,6 +54,12 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
     return eeg_epochs, erp_times
 
 def get_erps (eeg_epochs, is_target_event):
+    """
+    Args:
+         eeg_epochs: 3d array
+
+
+    """
     target_erp = np.mean(eeg_epochs[is_target_event], axis = 0)
     nontarget_erp = np.mean(eeg_epochs[~is_target_event], axis = 0)
     return target_erp, nontarget_erp
