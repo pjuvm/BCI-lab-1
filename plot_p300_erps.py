@@ -56,7 +56,8 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
 def get_erps (eeg_epochs, is_target_event):
     """
     Args:
-         eeg_epochs: 3d array
+         eeg_epochs: 3d array of size (event_samples.shape[1], samples_per_epoch, eeg_data.shape[0]) that contains 
+          all eeg_epochs (both target and non-target). 
 
 
     """
