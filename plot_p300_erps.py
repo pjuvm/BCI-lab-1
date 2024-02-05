@@ -2,6 +2,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 def get_events(rowcol_id, is_target):
+     """Args:
+        rowcol_id: 1d array of ints, 0 for no rowcol and 1-12 for rowcols on the P300 matrix 
+        is_target: 1d array, boolean, True if rowcol being flashed is target     
+       Returns:
+        event_sample: 1d array of ints (indices) where a rowcol is being flashed
+        is_target_event: 1d array, boolean mask of length equal to event_sample. True if the event is a target event. 
+    """
     event_sample = np.array(np.where(np.diff(rowcol_id) > 0)) + 1
     is_target_event = np.array([True if is_target[ind] else False for ind in event_sample[0]])
     return event_sample, is_target_event
