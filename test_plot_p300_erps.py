@@ -30,3 +30,9 @@ for subject in range(3, 11):
     plot_p300_erps.plot_erps(target_erp,nontarget_erp,erp_times)
 # %%
 # 1. The repeated up-and-down patterns represent 
+"""
+1.	The up and down patterns reflect neural activations involved in processing the P300 speller task, a visual oddball task. First, there is a C1 component, which is a positive deflection, followed by the P1 (positive deflection) and N1 (negative deflection) wave forms, before the P3a and P3b wave forms that the BCI relies on. This results in the up-and-down patterns in the EEG epochs.                
+2.	There are certain EEG channels that show early response to visual stimuli, such as the occipital and temporal lobe channels, which reflect activity in the primary visual cortex. 
+3.	The positive peak half a second after the target flash corresponds to the P3b component, which reflects higher level cognitive processes like target detection, context updating, and decision making. 
+4.	The channels that have often been shown to show strong P300 responses include Cz, Pz, Oz, CPz, because of their proximity to brain regions involved in attention, evaluation, and memory, which is important for the P300 speller task.
+"""
