@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+plot_p300_erps.py
+loads and plots p300 data and extracts epochs
+
+Created on Thu Jan 18 15:25:31 2024
+@author: marszzibros
+"""
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -9,7 +18,11 @@ def get_events(rowcol_id, is_target):
         event_sample: 1d array of ints (indices) where a rowcol is being flashed
         is_target_event: 1d array, boolean mask of length equal to event_sample. True if the event is a target event. 
     """
+
+    # get where rowcol_id is present +1 for indexing
     event_sample = np.array(np.where(np.diff(rowcol_id) > 0)) + 1
+    
+    # get if the event is target
     is_target_event = np.array([True if is_target[ind] else False for ind in event_sample[0]])
     return event_sample, is_target_event
 
@@ -30,26 +43,36 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
           erp_times: 1d array of size (seconds_per_epoch * samples_per_second), axis of time relative to the event onset 
 
     """
+
+    # calculate samples_per_second
     samples_per_second = 0
     seconds_per_epoch = epoch_end_time - epoch_start_time
 
     while eeg_time[samples_per_second] <= 1:
         samples_per_second += 1
 
+    # calculate samples_per_epoch
     samples_per_epoch = (samples_per_second - 1)* seconds_per_epoch
 
+    # calculate 0.5 second before and 1 second after the event
     event_before = int(round((abs(epoch_start_time) / seconds_per_epoch) * samples_per_epoch))
     event_after = int(round((abs(epoch_end_time) / seconds_per_epoch) * samples_per_epoch))
 
+    # define the array based on the dimensions
+    # 0 d: pages (epochs) 
+    # 1 d: rows (samples)
+    # 2 d: columns (channels)
     eeg_epochs = np.empty((event_sample.shape[1], int(samples_per_epoch), eeg_data.shape[0]), dtype = object)
     erp_times = np.linspace(epoch_start_time,epoch_end_time,int(samples_per_epoch))
 
-    for ind, event in enumerate(event_sample[0]):
+    for evnet_ind, event in enumerate(event_sample[0]):
         epoch = []
-
+        
+        # get eeg data for each event
         for eeg_time_ind in range(event - event_before, event + event_after):
+
             epoch.append(eeg_data.T[eeg_time_ind])
-        eeg_epochs[ind] = np.array(epoch)
+        eeg_epochs[evnet_ind] = np.array(epoch)
 
     return eeg_epochs, erp_times
 
@@ -90,14 +113,17 @@ def plot_erps(target_erp, nontarget_erp, erp_times):
     fig, axes = plt.subplots(3, 3, figsize=(12, 8))
 
     # Plot each subplot
-    for i in range(3):
-        for j in range(3):
-            plot_index = i * 3 + j
-            ax = axes[i, j]
+    for row_ind in range(3):
+        for col_ind in range(3):
+            plot_index = row_ind * 3 + col_ind
+            ax = axes[row_ind, col_ind]
             # Check if there are fewer than 8 plots
             if plot_index < 8:
-
-                
+                yticks = 0
+                if np.amax(abs(target_erp[plot_index])) > np.amax(abs(nontarget_erp[plot_index])):
+                    yticks = np.amax(abs(target_erp[plot_index]))//1
+                else:
+                    yticks = np.amax(abs(nontarget_erp[plot_index]))//1
                 # Plot target ERP
                 ax.plot(erp_times, target_erp[plot_index], label='Target')
                 
@@ -109,7 +135,7 @@ def plot_erps(target_erp, nontarget_erp, erp_times):
                 ax.axhline(y=0, linestyle='--', color='black', linewidth=1)
 
                 # Set y-axis ticks
-                ax.set_yticks([-2, 0, 2])
+                ax.set_yticks([-yticks, 0, yticks])
                 
                 # Set x-axis ticks
                 ax.set_xticks(np.linspace(erp_times[0], erp_times[-1], 4))                
