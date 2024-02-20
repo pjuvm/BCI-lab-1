@@ -90,8 +90,8 @@ def erp_group_median(subjects):
     #append subject nontarget median to list
     nontarget_median_ERPs.append(nontarget_median)
     #take list and created 3d array of shape (n_subjects, samples_per_epoch, channels)
-    stacked_target_erps = np.stack(target_median_ERPs)
-    stacked_nontarget_erps = np.stack(nontarget_median_ERPs)
+  stacked_target_erps = np.stack(target_median_ERPs)
+  stacked_nontarget_erps = np.stack(nontarget_median_ERPs)
     #find the median of those medians
   group_target_median_erp = np.median(stacked_target_erps, axis = 0)
   group_nontarget_median_erp = np.median(stacked_nontarget_erps, axis = 0)
