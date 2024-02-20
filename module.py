@@ -68,26 +68,31 @@ def find_significant_times(channel, subjects, samples_per_epoch=384, n_iter=500,
 
 def erp_group_median(subjects):
   """
-  function that takes EEG data from various subjects, finds the median per subject, and then finds the median of the medians.
-  Args: 
-    subjects: list of subjects by number 
+  function that takes EEG data from various subjects, finds the median per subject, and then finds the median of the medians
+  for each respective EEG group (e.g. target vs nontarget)
+  Args:
+    subjects: list of subjects 
   Returns
     group_median_erp: array of length samples_per_epoch
   """
 
-  subject_median_ERPs = []
+  target_median_ERPs = []
+  nontarget_median_ERPs = []
   for subj in subjects:
-    eeg_time, eeg_data, rowcol_id, is_target = load_training_eeg(subject = subj)
-
-    event_sample, is_target_event = get_events(rowcol_id, is_target)
-    eeg_epochs, erp_times = epoch_data(eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch_end_time = 1)
-
-    #find the median of the subject at hand 
-    subj_median = np.median(eeg_epochs, 0)
-    #append subject's median to a list of such medians 
-    subject_median_ERPs.append(subj_median)
+    target_epochs, nontarget_epochs = subject_epoch_groups(subj)
+    #print(target_epochs.shape)
+    #find the median of the subject at hand
+    target_median = np.median(target_epochs, 0)
+    # do same for nontarget
+    nontarget_median = np.median(nontarget_epochs, 0)
+    #append subject's median to a list of such medians
+    target_median_ERPs.append(target_median)
+    #append subject nontarget median to list
+    nontarget_median_ERPs.append(nontarget_median)
     #take list and created 3d array of shape (n_subjects, samples_per_epoch, channels)
-    stacked_median_erps = np.stack(subject_median_ERPs)
-    #find the median of those medians 
-    group_median_erp = np.median(stacked_median_erps, axis = 0)
-    return group_median_erp
+    stacked_target_erps = np.stack(target_median_ERPs)
+    stacked_nontarget_erps = np.stack(nontarget_median_ERPs)
+    #find the median of those medians
+  group_target_median_erp = np.median(stacked_target_erps, axis = 0)
+  group_nontarget_median_erp = np.median(stacked_nontarget_erps, axis = 0)
+  return group_target_median_erp, group_nontarget_median_erp
