@@ -98,7 +98,22 @@ def erp_group_median(subjects):
   return group_target_median_erp, group_nontarget_median_erp
 
 def window_waveform(signal, samples_per_epoch=384, start=-0.5, end=1.0, window_start = .25, window_end=0.5):
+  
+  """
+  this function takes an epoch and slices it along the time axis given a start point and end point 
+  Args:
+    signal: array of size (n_samples, n_channels)
+    samples_per_epoch: int number of samples in an epoch
+    start: float, epoch begin time relative to stimulus onset 
+    end: float, epoch end time relative to stimulus onset 
+    window_start: float, time in (ms) relative to stimulus onset where window start 
+    window_end: float, time in (ms) relative to stimulus onset where window ends 
+  Return:
+    windowed_signal: 1d array of length samples between window start and end 
+  """
+
   time_axis = np.linspace(start, end, samples_per_epoch)
   window_mask = np.where((time_axis >= window_start) & (time_axis <= window_end))
   windowed_signal = signal[window_mask]
+  windowed_signal = windowed_signal.mean(axis = 0)
   return windowed_signal
