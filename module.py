@@ -96,3 +96,9 @@ def erp_group_median(subjects):
   group_target_median_erp = np.median(stacked_target_erps, axis = 0)
   group_nontarget_median_erp = np.median(stacked_nontarget_erps, axis = 0)
   return group_target_median_erp, group_nontarget_median_erp
+
+def window_waveform(signal, samples_per_epoch=384, start=-0.5, end=1.0, window_start = .25, window_end=0.5):
+  time_axis = np.linspace(start, end, samples_per_epoch)
+  window_mask = np.where((time_axis >= window_start) & (time_axis <= window_end))
+  windowed_signal = signal[window_mask]
+  return windowed_signal
