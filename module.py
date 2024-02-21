@@ -49,22 +49,42 @@ def p_value_gen(EEG1, EEG2, n_iter = 500, channel = 0, alpha = 0.05, random_seed
   return score/n_iter, np.where(score/n_iter < alpha) #calculate percentage of bootstrap samples bigger than the real data
 
 
-def find_significant_times(channel, subjects, samples_per_epoch=384, n_iter=500, random_seed=888):
+def find_significant_times(subjects, n_channels = 8, alpha = 0.05, samples_per_epoch=384, n_iter=500, random_seed=888):
   """
-  function that finds, given an EEG channel, how many subjects had statistically significant P300 responses at what time points
-  """
-  np.random.seed(random_seed)
-  score = np.zeros(samples_per_epoch,)
-  for subj in subjects:
-    EEGa,EEGb = subject_epoch_groups(subj)  #split data into two conditions or groups of EEG
-    my_raw_pvals = p_value_gen(EEG1 = EEGa, EEG2 = EEGb, n_iter = 500, channel = channel, alpha = 0.05)   #get the uncorrected p-values
-    mask = fdr_correction(my_raw_pvals[0])[0]   #false discovery rate correction for the p-values
-    mask = mask.astype(int)     #takes boolean mask converts to binary matrix of 1s and 0s
-    score += mask               #adds the above matrix to the score matrix, to tally significant time points across subjects
-  my_mask = np.where(score != 0)
-  #erp_times = np.linspace(-0.5,1.0,384)
+  this function takes the data across the various subjects and channels, epochs the data by label (e.g. target vs nontarget),
+  then generates false discovery rate corrected p-values for each time point (sample) in the epoch. This is then
+  used to create a "tally" matrix that shows, given a channel, how subjects had statistically significant results 
+  at that particular time.
 
-  return score
+  Args: 
+    subjects: list of numbers corresponding to subject  e.g. [1,2,3]
+    n_channels: int, number of channels in the data
+    alpha: statistical significance threshold, default is 0.05
+    samples_per_epoch: int, number of samples in an epoch
+    n_iter: int, number of bootstrap samples
+  Returns:
+    significance_dict: a dictionary, where each key corresponds to a channel (e.g. "1") and the associated value is an array of 
+    size (samples_per_epoch,) that gives counts of how many subjects had significant results at that time point in the epoch
+
+  """
+  significance_dict = {} 
+  np.random.seed(random_seed)
+  for chan in range(n_channels):
+    score = np.zeros(samples_per_epoch,)
+    for subj in subjects:
+      #split data into two conditions or groups of EEG
+      EEGa,EEGb = subject_epoch_groups(subj)  
+      #get the uncorrected p-values
+      my_raw_pvals = p_value_gen(EEG1 = EEGa, EEG2 = EEGb, n_iter = 500, channel = channel, alpha = 0.05)   
+      #false discovery rate correction for the p-values, uses fdr_correction output of boolean values based on alpha threshold
+      mask = fdr_correction(my_raw_pvals[0], alpha = alpha)[0]   
+      #takes boolean mask converts to binary matrix of 1s and 0s
+      mask = mask.astype(int)   
+       #adds the above matrix to the score matrix, to tally significant time points across subjects  
+      score += mask              
+    #add the per channel significance matrix to a dictionary 
+    significance_dict[str(channel)] = score
+  return significance_dict
 
 def erp_group_median(subjects):
   """
