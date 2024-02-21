@@ -86,6 +86,42 @@ def find_significant_times(subjects, n_channels = 8, alpha = 0.05, samples_per_e
     significance_dict[str(channel)] = score
   return significance_dict
 
+def rank_channel_significance(channels, fs, epoch_start, epoch_end, tstart, tend):
+  """ this function ranks each channel by examining the corresponding 'significance matrix', a matrix 
+  which shows how many subjects had significant results at a given time point in the epoch. The ranking is done 
+  by computing an "integral", that is, treating the matrix's values as a step function. This "integral" rewards 
+  greater numbers of subjects (height) as well as the number of time slices (width, temporal duration) to create a 
+  rough way of ranking the channels. We can use tstart and tend to confine our "limits of integration" to a particular 
+  time slice of interest, e.g. 0-500ms after stimulus onset, or 200-500ms after onset.
+
+  Args:
+    channels: int, number of channels 
+    fs: float, sampling frequency
+    epoch_start: float, first time point in epoch
+    epoch_end: float, last time point in epoch
+    tstart: float, the first time point in the window of interest
+    tend: float, the last time point in the window of interest 
+  Returns:
+    rankarray_sorted_desc: array of shape (n_channels,1). The first axis (channels) is ordered using the values 
+    in the second axis (integral), thus giving the ranking of most important channel to least important channel
+    in the given time window. 
+
+  """
+  
+  time_axis = np.linspace(epoch_start, epoch_end, int(fs * (epoch_end - epoch_start)))
+  print(len(time_axis))
+  time_mask = (time_axis >= tstart) & (time_axis <= tend)
+  rankarray = np.empty((len(channels),2))
+  dx = 1/fs
+  for chan in range(len(channels)):
+    
+    rankarray[chan][0] = chan
+    rankarray[chan][1] = np.sum(significance_dict[str(chan)][time_mask] * dx)
+
+  
+  rankarray_sorted_desc = rankarray[rankarray[:, 1].argsort()[::-1]]
+  return rankarray_sorted_desc 
+
 def erp_group_median(subjects):
   """
   function that takes EEG data from various subjects, finds the median per subject, and then finds the median of the medians
